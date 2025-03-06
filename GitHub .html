@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>مبادئ المحاسبة - دفتر اليومية ودفتر الأستاذ</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+      font-family: sans-serif;
+      background-color: #f9f9f9;
+    }
+    h1, h2 {
+      text-align: center;
+      margin-top: 20px;
+    }
+    /* زيادة عرض الجداول وعدم كسر النص */
+    table, th, td {
+      white-space: nowrap;
+    }
+    #journal, #manualJournalDisplay, #ledger {
+      width: 90%;
+      max-width: 1000px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 15px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    input[type="text"], input[type="number"] {
+      width: 90%;
+      padding: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      border: none;
+      background-color: #007bff;
+      color: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .deleteRowBtn {
+      background-color: #e74c3c;
+    }
+    .deleteRowBtn:hover {
+      background-color: #c0392b;
+    }
+    .t-account {
+      border: 2px solid #000;
+      margin: 20px 0;
+    }
+    .t-account thead th {
+      background-color: #f0f0f0;
+    }
+    .t-account .account-title {
+      text-align: center;
+      font-weight: bold;
+      background-color: #fafafa;
+      border-bottom: 2px solid #000;
+    }
+    .t-account .sides-header {
+      background-color: #f5f5f5;
+      font-weight: bold;
+    }
+    .t-account td, .t-account th {
+      border: 1px solid #000;
+      padding: 6px;
+    }
+    .t-account .inner-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .t-account .inner-table th, .t-account .inner-table td {
+      border: 1px solid #ddd;
+      padding: 4px;
+      text-align: center;
+    }
+    .balance-info {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 5px;
+    }
+    /* تنسيق إضافي لأزرار الترصيد */
+    #postBtn {
+      background-color: #28a745;
+    }
+    #postBtn:hover {
+      background-color: #218838;
+    }
+    /* تنسيق زر الترصيد وإلغاء الترصيد */
+    #doTarsidBtn {
+      background-color: #ffc107;
+      color: #000;
+    }
+    #undoTarsidBtn {
+      background-color: #dc3545;
+    }
+    /* تنسيق خاص لدفتر اليومية اليدوي */
+    #manualJournalDisplay table thead th {
+      background-color: #f9f9f9;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- عرض اسم المصمم أعلى العنوان -->
+  <h2>مصمم الموقع محمد وضاح نصر</h2>
+  <h1>مبادئ المحاسبة</h1>
+
+  <!-- دفتر اليومية (نموذج الإدخال) -->
+  <div id="journal">
+    <h2>دفتر اليومية (نموذج الإدخال)</h2>
+    <table id="journalTable">
+      <thead>
+        <tr>
+          <th>التاريخ</th>
+          <th>الحساب المدين</th>
+          <th>المبلغ المدين</th>
+          <th>الحساب الدائن</th>
+          <th>المبلغ الدائن</th>
+          <th>البيان</th>
+          <th>إجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- صف افتراضي أولي -->
+        <tr>
+          <td><input type="text" placeholder="مثال: 1/1"></td>
+          <td><input type="text" placeholder="مثال: حـ/ البنك"></td>
+          <td><input type="number" placeholder="مدين"></td>
+          <td><input type="text" placeholder="مثال: حـ/ رأس المال"></td>
+          <td><input type="number" placeholder="دائن"></td>
+          <td><input type="text" placeholder="مثال: إيداع مبلغ كرأس مال"></td>
+          <td><button class="deleteRowBtn">حذف</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <button id="addRowBtn">إضافة صف</button>
+    <button id="postBtn">ترحيل إلى دفتر الأستاذ</button>
+  </div>
+
+  <!-- قسم عرض دفتر اليومية بشكل يدوي -->
+  <div id="manualJournalDisplay" style="display: none;">
+    <h2>دفتر اليومية (التنسيق اليدوي)</h2>
+    <table id="manualJournalTable">
+      <thead>
+        <tr>
+          <th>مدين</th>
+          <th>دائن</th>
+          <th>البيان</th>
+          <th>التاريخ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- تُضاف الصفوف تلقائيًا -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- دفتر الأستاذ (حسابات T) -->
+  <div id="ledger">
+    <h2>دفتر الأستاذ</h2>
+    <div style="text-align:center; margin-bottom:10px;">
+      <button id="doTarsidBtn">ترصيد</button>
+      <button id="undoTarsidBtn">إلغاء الترصيد</button>
+    </div>
+    <div id="ledgerContainer">
+      <!-- تُبنى الحسابات (على شكل T) ديناميكيًا -->
+    </div>
+  </div>
+
+  <script>
+    // مراجع العناصر
+    const addRowBtn = document.getElementById('addRowBtn');
+    const journalTable = document.getElementById('journalTable').querySelector('tbody');
+    const postBtn = document.getElementById('postBtn');
+    const ledgerContainer = document.getElementById('ledgerContainer');
+    const manualJournalDisplay = document.getElementById('manualJournalDisplay');
+    const manualJournalTableBody = document.getElementById('manualJournalTable').querySelector('tbody');
+    const doTarsidBtn = document.getElementById('doTarsidBtn');
+    const undoTarsidBtn = document.getElementById('undoTarsidBtn');
+
+    let globalTransactions = [];
+    let globalLedgerData = {};
+    let isLedgerPosted = false; // لمعرفة ما إذا تم ترحيل القيود مسبقًا
+
+    // إضافة صف جديد في دفتر اليومية
+    addRowBtn.addEventListener('click', () => {
+      const newRow = document.createElement('tr');
+      newRow.innerHTML = `
+        <td><input type="text" placeholder="مثال: 10/1"></td>
+        <td><input type="text" placeholder="مثال: حـ/ المباني"></td>
+        <td><input type="number" placeholder="مدين"></td>
+        <td><input type="text" placeholder="مثال: حـ/ البنك"></td>
+        <td><input type="number" placeholder="دائن"></td>
+        <td><input type="text" placeholder="مثال: شراء مبنى بشيك"></td>
+        <td><button class="deleteRowBtn">حذف</button></td>
+      `;
+      journalTable.appendChild(newRow);
+      newRow.querySelector('.deleteRowBtn').addEventListener('click', function() {
+        this.closest('tr').remove();
+      });
+    });
+
+    // حدث حذف الصفوف الموجودة مسبقاً
+    document.querySelectorAll('.deleteRowBtn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        this.closest('tr').remove();
+      });
+    });
+
+    // ترحيل القيود إلى دفتر الأستاذ
+    postBtn.addEventListener('click', () => {
+      ledgerContainer.innerHTML = "";
+      manualJournalTableBody.innerHTML = "";
+      let transactions = [];
+      const rows = journalTable.querySelectorAll('tr');
+      rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        if (inputs.length === 6) {
+          const date = inputs[0].value.trim();
+          const debitAccount = inputs[1].value.trim();
+          const debitAmount = parseFloat(inputs[2].value);
+          const creditAccount = inputs[3].value.trim();
+          const creditAmount = parseFloat(inputs[4].value);
+          const explanation = inputs[5].value.trim();
+          if (date && debitAccount && !isNaN(debitAmount) && creditAccount && !isNaN(creditAmount)) {
+            transactions.push({ date, debitAccount, debitAmount, creditAccount, creditAmount, explanation });
+          }
+        }
+      });
+      globalTransactions = transactions;
+
+      // بناء دفتر اليومية اليدوي
+      manualJournalDisplay.style.display = transactions.length > 0 ? "block" : "none";
+      transactions.forEach(tx => {
+        const rowDebit = document.createElement('tr');
+        rowDebit.innerHTML = `
+          <td>${tx.debitAmount}</td>
+          <td></td>
+          <td>م حـ/ ${tx.debitAccount}</td>
+          <td>${tx.date}</td>
+        `;
+        const rowCredit = document.createElement('tr');
+        rowCredit.innerHTML = `
+          <td></td>
+          <td>${tx.creditAmount}</td>
+          <td>إلى حـ/ ${tx.creditAccount}</td>
+          <td></td>
+        `;
+        const rowExplanation = document.createElement('tr');
+        rowExplanation.style.borderBottom = "2px solid #000";
+        rowExplanation.innerHTML = `<td colspan="4">(${tx.explanation})</td>`;
+        manualJournalTableBody.appendChild(rowDebit);
+        manualJournalTableBody.appendChild(rowCredit);
+        manualJournalTableBody.appendChild(rowExplanation);
+      });
+
+      // تجميع البيانات لكل حساب في دفتر الأستاذ
+      let ledgerData = {};
+      transactions.forEach(tx => {
+        if (!ledgerData[tx.debitAccount]) {
+          ledgerData[tx.debitAccount] = { debitEntries: [], creditEntries: [] };
+        }
+        ledgerData[tx.debitAccount].debitEntries.push({
+          date: tx.date,
+          explanation: "إلى حـ/ " + tx.creditAccount,
+          amount: tx.debitAmount
+        });
+        if (!ledgerData[tx.creditAccount]) {
+          ledgerData[tx.creditAccount] = { debitEntries: [], creditEntries: [] };
+        }
+        ledgerData[tx.creditAccount].creditEntries.push({
+          date: tx.date,
+          explanation: "من حـ/ " + tx.debitAccount,
+          amount: tx.creditAmount
+        });
+      });
+      globalLedgerData = ledgerData;
+      renderLedger(false); // عرض دفتر الأستاذ بدون ترصيد
+      isLedgerPosted = true;
+    });
+
+    // دالة رسم دفتر الأستاذ مع أو بدون ترصيد
+    function renderLedger(withTarsid) {
+      ledgerContainer.innerHTML = "";
+      for (let accountName in globalLedgerData) {
+        const accountInfo = globalLedgerData[accountName];
+        const totalDebit = accountInfo.debitEntries.reduce((acc, entry) => acc + entry.amount, 0);
+        const totalCredit = accountInfo.creditEntries.reduce((acc, entry) => acc + entry.amount, 0);
+        const balance = totalDebit - totalCredit;
+        // إنشاء نموذج الحساب (T-account) بدون tfoot
+        const accountDiv = document.createElement('div');
+        accountDiv.innerHTML = `
+          <table class="t-account">
+            <thead>
+              <tr>
+                <th class="account-title" colspan="3">${accountName}</th>
+              </tr>
+              <tr class="sides-header">
+                <th>مدين (منه)</th>
+                <th></th>
+                <th>دائن (له)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="vertical-align: top;">
+                  <table class="inner-table">
+                    <thead>
+                      <tr>
+                        <th>التاريخ</th>
+                        <th>البيان</th>
+                        <th>المبلغ</th>
+                      </tr>
+                    </thead>
+                    <tbody id="debitSide"></tbody>
+                  </table>
+                </td>
+                <td style="width: 10px; background: #000;"></td>
+                <td style="vertical-align: top;">
+                  <table class="inner-table">
+                    <thead>
+                      <tr>
+                        <th>التاريخ</th>
+                        <th>البيان</th>
+                        <th>المبلغ</th>
+                      </tr>
+                    </thead>
+                    <tbody id="creditSide"></tbody>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="balance-info">الرصيد: <span id="balanceSpan"></span></div>
+        `;
+        const debitSideTbody = accountDiv.querySelector('#debitSide');
+        const creditSideTbody = accountDiv.querySelector('#creditSide');
+
+        // تعبئة حركات الحساب
+        accountInfo.debitEntries.forEach(entry => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${entry.date}</td><td>${entry.explanation}</td><td>${entry.amount}</td>`;
+          debitSideTbody.appendChild(tr);
+        });
+        accountInfo.creditEntries.forEach(entry => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${entry.date}</td><td>${entry.explanation}</td><td>${entry.amount}</td>`;
+          creditSideTbody.appendChild(tr);
+        });
+
+        if (!withTarsid) {
+          // بدون ترصيد نعرض فقط الحركات الأساسية
+        } else {
+          const bigger = Math.max(totalDebit, totalCredit);
+          const diff = Math.abs(totalDebit - totalCredit);
+
+          if (totalDebit > totalCredit) {
+            // للحساب المدين (Debit side):
+            // إضافة صف يظهر الرقم الأكبر مع خطوط (لا يتكرر الرقم المدخل)
+            const trDebitLargest = document.createElement('tr');
+            trDebitLargest.innerHTML = `<td colspan="2"></td><td style="border-top:2px solid #000; border-bottom:2px solid #000;">${bigger}</td>`;
+            debitSideTbody.appendChild(trDebitLargest);
+            // إضافة صف "رصيد منقول" بالفرق
+            const trDebitManqool = document.createElement('tr');
+            trDebitManqool.innerHTML = `<td></td><td>رصيد منقول</td><td>${diff}</td>`;
+            debitSideTbody.appendChild(trDebitManqool);
+
+            // للحساب الدائن (Credit side):
+            const closingDateCredit = accountInfo.creditEntries.length > 0 
+              ? accountInfo.creditEntries[accountInfo.creditEntries.length - 1].date 
+              : "";
+            const trCreditMarhal = document.createElement('tr');
+            trCreditMarhal.innerHTML = `<td>${closingDateCredit}</td><td>رصيد مرحل</td><td>${diff}</td>`;
+            creditSideTbody.appendChild(trCreditMarhal);
+            const trCreditLargest = document.createElement('tr');
+            trCreditLargest.innerHTML = `<td colspan="2"></td><td style="border-top:2px solid #000; border-bottom:2px solid #000;">${bigger}</td>`;
+            creditSideTbody.appendChild(trCreditLargest);
+          } else if (totalCredit > totalDebit) {
+            // للحساب المدين (Debit side):
+            const closingDateDebit = accountInfo.debitEntries.length > 0 
+              ? accountInfo.debitEntries[accountInfo.debitEntries.length - 1].date 
+              : "";
+            const trDebitMarhal = document.createElement('tr');
+            trDebitMarhal.innerHTML = `<td>${closingDateDebit}</td><td>رصيد مرحل</td><td>${diff}</td>`;
+            debitSideTbody.appendChild(trDebitMarhal);
+            const trDebitLargest = document.createElement('tr');
+            trDebitLargest.innerHTML = `<td colspan="2"></td><td style="border-top:2px solid #000; border-bottom:2px solid #000;">${bigger}</td>`;
+            debitSideTbody.appendChild(trDebitLargest);
+
+            // للحساب الدائن (Credit side):
+            const trCreditLargest = document.createElement('tr');
+            trCreditLargest.innerHTML = `<td colspan="2"></td><td style="border-top:2px solid #000; border-bottom:2px solid #000;">${bigger}</td>`;
+            creditSideTbody.appendChild(trCreditLargest);
+            const trCreditManqool = document.createElement('tr');
+            trCreditManqool.innerHTML = `<td></td><td>رصيد منقول</td><td>${diff}</td>`;
+            creditSideTbody.appendChild(trCreditManqool);
+          } else {
+            // إذا كان المجموع متعادل
+            const trDebitLargest = document.createElement('tr');
+            trDebitLargest.innerHTML = `<td colspan="2"></td><td style="border-top:2px solid #000; border-bottom:2px solid #000;">${totalDebit}</td>`;
+            debitSideTbody.appendChild(trDebitLargest);
+            const trCreditLargest = document.createElement('tr');
+            trCreditLargest.innerHTML = `<td colspan="2"></td><td style="border-top:2px solid #000; border-bottom:2px solid #000;">${totalCredit}</td>`;
+            creditSideTbody.appendChild(trCreditLargest);
+          }
+        }
+
+        let balanceText = "";
+        if (balance > 0) {
+          balanceText = `${balance} مدين`;
+        } else if (balance < 0) {
+          balanceText = `${Math.abs(balance)} دائن`;
+        } else {
+          balanceText = "صفر";
+        }
+        accountDiv.querySelector('#balanceSpan').textContent = balanceText;
+        ledgerContainer.appendChild(accountDiv);
+      }
+    }
+
+    doTarsidBtn.addEventListener('click', () => {
+      if (!isLedgerPosted) {
+        alert("يجب أولاً ترحيل القيود إلى دفتر الأستاذ.");
+        return;
+      }
+      renderLedger(true);
+    });
+
+    undoTarsidBtn.addEventListener('click', () => {
+      if (!isLedgerPosted) {
+        alert("لم يتم ترحيل القيود بعد.");
+        return;
+      }
+      renderLedger(false);
+    });
+  </script>
+</body>
+</html>
